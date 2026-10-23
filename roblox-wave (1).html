@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox Wave — Music Visualizer</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#090914;--panel:#111120;--line:#292943;--purple:#a875ff;--pink:#f09bff;--text:#f5f1ff;--muted:#aaa5c6}
+body{margin:0;background:radial-gradient(ellipse at top,#21163b,#090914 60%);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;padding:22px}
+button,input{font:inherit}
+button{cursor:pointer}
+.app{max-width:1250px;margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:12px}
+.logo{font-size:25px;font-weight:800;letter-spacing:1px}
+.logo span{color:var(--purple)}
+.tag{color:#d8c5ff;border:1px solid #554174;border-radius:20px;padding:8px 13px;font-size:12px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr) 290px;gap:17px}
+.panel{background:#11111edb;border:1px solid var(--line);border-radius:19px;padding:18px;min-width:0}
+h2{font-size:17px;margin:0}
+.muted{color:var(--muted);font-size:12px}
+button{color:var(--text)}
+.add{background:linear-gradient(120deg,#b17bff,#7445ed);border:0;border-radius:11px;padding:11px 15px;font-weight:bold}
+.playlist-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}
+.track{display:flex;align-items:center;gap:10px;padding:10px 7px;border-bottom:1px solid #26253a;cursor:pointer;border-radius:10px}
+.track.active{background:#382754;border:1px solid #9465ed}
+.thumb{width:45px;height:45px;flex-shrink:0;object-fit:cover;border-radius:50%;background:#29203e;border:1px solid #8f70c8}
+.track-info{min-width:0;flex:1}
+.track-name{font-weight:bold;font-size:13px;overflow-wrap:anywhere}
+.track-id{font-size:11px;color:var(--muted);margin-top:5px}
+.delete{border:0;background:transparent;color:#b7a4d8;padding:7px}
+.player{text-align:center;position:relative;overflow:hidden}
+.player-top{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}
+.volume{width:100px;accent-color:var(--purple)}
+.cover{will-change:transform;width:min(230px,65%);aspect-ratio:1;border-radius:50%;object-fit:cover;margin:30px auto 18px;border:3px solid #b58aff;box-shadow:0 0 28px #9256ff50;background:#201833}
+.song-title{font-size:24px;font-weight:bold;overflow-wrap:anywhere}
+.song-id{font-size:12px;color:var(--muted);margin-top:8px}
+.visualizer{width:100%;height:180px;display:block;margin-top:20px}
+.progress-row{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted)}
+#progress{width:100%}
+.controls{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:19px}
+.control{background:transparent;border:0;font-size:21px;padding:10px}
+.control.main{width:58px;height:58px;border:2px solid var(--purple);border-radius:50%;font-size:24px;box-shadow:0 0 18px #9a65ff35}
+.status{font-size:11px;color:#c6a8ff;margin-top:15px;min-height:15px}
+.tabs{display:flex;gap:6px;margin-bottom:18px}
+.tab{flex:1;background:transparent;border:1px solid var(--line);border-radius:9px;padding:10px 5px;font-size:12px}
+.tab.active{background:#34234e;border-color:var(--purple)}
+.form{display:none}
+.form.active{display:block}
+label{display:block;font-size:12px;margin:15px 0 7px;color:#ddd4f4}
+.field{width:100%;min-width:0;background:#191929;border:1px solid #393650;border-radius:9px;padding:12px;color:white;outline:none}
+.field:focus{border-color:var(--purple)}
+.image-preview{width:92px;height:92px;border-radius:50%;object-fit:cover;border:2px solid #7652a6;background:#241a38}
+.upload-row{display:flex;align-items:center;gap:13px}
+.file-label{display:inline-block;background:#29243b;border:1px solid #51466a;border-radius:9px;padding:10px;font-size:12px;cursor:pointer}
+.file-label input{display:none}
+.submit{width:100%;margin-top:19px}
+.empty{font-size:12px;color:var(--muted);text-align:center;padding:25px 5px;line-height:1.8}
+.note{margin-top:17px;font-size:11px;color:var(--muted);line-height:1.7}
+@media(max-width:1000px){.layout{grid-template-columns:220px minmax(0,1fr)}.right-panel{grid-column:1/-1}}
+@media(max-width:620px){body{padding:12px}.layout{grid-template-columns:minmax(0,1fr)}.right-panel{grid-column:auto}.playlist-panel{order:2}.player{order:1}.right-panel{order:3}.cover{width:180px}.visualizer{height:135px}}
+.ic{width:1em;height:1em;flex-shrink:0;display:inline-block;vertical-align:-.15em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ic.fill{fill:currentColor}
+.ic-big .ic{width:34px;height:34px;color:#a98be0;stroke-width:1.6}
+.add,.tab,.tag,.file-label{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.add .ic{font-size:17px}
+.tab{display:flex}
+.control{display:inline-flex;align-items:center;justify-content:center}
+.control .ic{width:1em;height:1em}
+.control.main .ic{width:26px;height:26px;margin-left:2px}
+.control.main[data-state="playing"] .ic{margin-left:0}
+.vol-ic{display:inline-flex;font-size:19px;color:#cdbcf2}
+.delete{display:inline-flex;align-items:center;justify-content:center}
+.delete .ic{width:16px;height:16px}
+.delete:hover{color:#fff}
+.muted .ic{width:13px;height:13px;vertical-align:-2px}
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%) translateY(-16px);background:#2b1d45;border:1px solid var(--purple);color:var(--text);padding:11px 16px;border-radius:12px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:50;max-width:90vw;box-shadow:0 0 22px #9256ff50;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div class="app">
+<header>
+  <div class="logo">ROBLOX<span>.WAVE</span><div class="muted" style="margin-top:6px">YOUR MUSIC UNIVERSE</div></div>
+  <div class="tag"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> MUSIC PLAYER</div>
+</header>
+<div class="layout">
+  <aside class="panel playlist-panel">
+    <div class="playlist-head"><h2>Playlist <span id="count" class="muted">0</span></h2><button class="add" aria-label="Tambah lagu" title="Tambah lagu" onclick="openTab('add',true)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button></div>
+    <div id="playlist"><div class="empty"><span class="ic-big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><br>Belum ada lagu.<br>Tambahkan lagu di sebelah kanan!</div></div>
+  </aside>
+  <main class="panel player">
+    <div class="player-top"><span class="muted">NOW PLAYING <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><div style="display:flex;align-items:center;gap:7px"><span id="volIcon" class="vol-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span> <input class="volume" id="volume" type="range" min="0" max="1" step=".01" value=".7" aria-label="Volume"></div></div>
+    <img id="cover" class="cover" alt="Cover lagu" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23201937'/%3E%3Cg transform='translate(100.0 100.0) scale(3.6) translate(-12 -12)' fill='none' stroke='%23c69aff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M9 18V5l12-2v13%22/%3E%3Ccircle cx=%226%22 cy=%2218%22 r=%223%22/%3E%3Ccircle cx=%2218%22 cy=%2216%22 r=%223%22/%3E%3C/g%3E%3C/svg%3E">
+    <div class="song-title" id="songTitle">Midnight in Roblox</div>
+    <div class="song-id" id="songId">AUDIO ID: —</div>
+    <canvas id="visualizer" class="visualizer"></canvas>
+    <div class="progress-row"><span id="currentTime">0:00</span><input id="progress" type="range" min="0" max="1000" value="0" aria-label="Posisi lagu"><span id="duration">0:00</span></div>
+    <div class="controls">
+      <button class="control" id="shuffle" title="Acak" aria-label="Acak"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/></svg></button><button class="control" id="prev" title="Sebelumnya" aria-label="Sebelumnya"><svg class="ic fill" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/></svg></button><button class="control main" id="play" title="Putar" aria-label="Putar" data-state="paused"><svg class="ic fill" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon points="6 3 20 12 6 21 6 3"/></svg></button><button class="control" id="next" title="Berikutnya" aria-label="Berikutnya"><svg class="ic fill" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></svg></button><button class="control" id="repeat" title="Ulangi" aria-label="Ulangi"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></button>
+    </div>
+    <div class="status" id="status">Pilih lagu untuk memulai.</div>
+    <audio id="audio" preload="metadata"></audio>
+  </main>
+  <aside class="panel right-panel">
+    <div class="tabs"><button id="tab-add" class="tab active" onclick="openTab('add')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Tambah</button><button id="tab-edit" class="tab" onclick="openTab('edit')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg> Edit</button></div>
+    <div id="addForm" class="form active">
+      <h2>Tambah lagu</h2><label>Gambar cover bulat</label>
+      <div class="upload-row"><img id="preview" class="image-preview" alt="Preview cover" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23201937'/%3E%3Cg transform='translate(50.0 50.0) scale(1.8) translate(-12 -12)' fill='none' stroke='%23c69aff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M9 18V5l12-2v13%22/%3E%3Ccircle cx=%226%22 cy=%2218%22 r=%223%22/%3E%3Ccircle cx=%2218%22 cy=%2216%22 r=%223%22/%3E%3C/g%3E%3C/svg%3E"><label class="file-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> Pilih gambar<input id="imageFile" type="file" accept="image/*"></label></div>
+      <label>Nama lagu</label><input class="field" id="nameInput" maxlength="100" placeholder="Contoh: Space Song">
+      <label>Roblox Audio ID</label><input class="field" id="idInput" inputmode="numeric" placeholder="Contoh: 1234567890">
+      <label>File audio (MP3 / WAV)</label><input class="field" id="audioFile" type="file" accept="audio/*">
+      <div class="muted" style="margin-top:7px">File audio lokal diperlukan agar browser bisa memutar lagu. ID Roblox hanya untuk identitas lagu.</div>
+      <button class="add submit" id="addBtn" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Tambahkan ke playlist</button>
+    </div>
+    <div id="editForm" class="form">
+      <h2>Edit lagu</h2><p class="muted">Pilih lagu dari playlist terlebih dahulu.</p>
+      <label>Nama lagu</label><input class="field" id="editName" maxlength="100">
+      <label>Roblox Audio ID</label><input class="field" id="editId" inputmode="numeric">
+      <label>Ganti gambar cover</label><input class="field" id="editImage" type="file" accept="image/*">
+      <label>Ganti file audio (opsional)</label><input class="field" id="editAudio" type="file" accept="audio/*">
+      <button class="add submit" id="editBtn" type="button">Simpan perubahan</button><div class="note">Perubahan berlaku pada lagu yang sedang dipilih.</div>
+    </div>
+    <div class="note">ROBLOX.WAVE<br>Personal music player · Purple edition</div>
+  </aside>
+</div>
+</div>
+<script>
+/* =====================================================================
+   SPECTRUM ANALYZER (pure logic, tidak menyentuh DOM)
+   Memetakan data FFT asli (dB) -> tinggi batang, dan mendeteksi hentakan bass.
+   ===================================================================== */
+// ==ANALYSIS-START==
+const SpectrumAnalyzer=(()=>{
+  const F_MIN=30,F_MAX=16000;          // rentang frekuensi yang ditampilkan (Hz)
+  const MEL_F0=300;                    // skala log-lembut: rapat di bass, tetap log di atas
+  const DB_FLOOR=-90,DB_CEIL=-22;      // rentang dB analyser yang dipetakan ke 0..1
+  const TILT_REF=200,TILT_DB_OCT=4;    // kompensasi kemiringan spektrum musik (+4 dB/oktaf di atas 200 Hz)
+  const BASS_LO=35,BASS_HI=140;        // rentang deteksi kick / bass
+  const ATTACK_TAU=0.022,RELEASE_TAU=0.17; // smoothing naik cepat, turun halus (detik)
+  const AGC_ATTACK=0.25,AGC_RELEASE=6,AGC_MIN=0.5,WARMUP=0.4; // AGC lambat agar kick tidak menekan batang lain
+  const LN10_20=0.11512925464970229;   // ln(10)/20
+
+  const dbToMag=d=>d>-200?Math.exp(d*LN10_20):0; // -Infinity / NaN -> 0
+  const magToDb=m=>20*Math.log10(m+1e-9);
+  const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+
+  function makeRange(loHz,hiHz,binHz,bins){
+    const loBin=loHz/binHz,hiBin=hiHz/binHz;
+    const i0=Math.max(1,Math.ceil(loBin)),i1=Math.min(bins-1,Math.floor(hiBin));
+    const c=Math.sqrt(loHz*hiHz)/binHz;
+    const a=clamp(Math.floor(c),1,bins-2);
+    return {i0,i1,a,t:clamp(c-a,0,1)};
+  }
+
+  // Hitung frekuensi tiap batang dari sampleRate / fftSize yang sebenarnya.
+  function createLayout(count,sampleRate,fftSize){
+    const bins=fftSize/2,binHz=sampleRate/fftSize;
+    const fMax=Math.min(F_MAX,sampleRate/2*0.98);
+    const mLo=Math.log(1+F_MIN/MEL_F0),mHi=Math.log(1+fMax/MEL_F0);
+    const edges=[];
+    for(let i=0;i<=count;i++)edges.push(MEL_F0*(Math.exp(mLo+(mHi-mLo)*i/count)-1));
+    const ranges=[],center=new Float32Array(count),tilt=new Float32Array(count),kickW=new Float32Array(count);
+    for(let i=0;i<count;i++){
+      const lo=edges[i],hi=edges[i+1],c=Math.sqrt(lo*hi);
+      ranges.push(makeRange(lo,hi,binHz,bins));
+      center[i]=c;
+      tilt[i]=c>TILT_REF?TILT_DB_OCT*Math.log2(c/TILT_REF):0;
+      const z=Math.log2(c/70)/1.3;kickW[i]=Math.exp(-0.5*z*z); // bobot kuat di sekitar 40-150 Hz
+    }
+    return {count,sampleRate,fftSize,bins,binHz,edges,ranges,center,tilt,kickW,
+            bass:makeRange(BASS_LO,BASS_HI,binHz,bins)};
+  }
+
+  function createState(layout){
+    return {layout,bars:new Float32Array(layout.count),raw:new Float32Array(layout.count),
+            env:0,bassAvg:0,kick:0,bassLevel:0,active:0};
+  }
+
+  function rangeMag(spec,r,peakW){
+    if(r.i1<r.i0){ // rentang lebih sempit dari satu bin -> interpolasi antar bin
+      const m0=dbToMag(spec[r.a]),m1=dbToMag(spec[r.a+1]);
+      return m0+(m1-m0)*r.t;
+    }
+    let peak=0,sum=0;
+    for(let i=r.i0;i<=r.i1;i++){const m=dbToMag(spec[i]);sum+=m;if(m>peak)peak=m}
+    return peakW*peak+(1-peakW)*sum/(r.i1-r.i0+1);
+  }
+
+  // spec: Float32Array dB dari analyser.getFloatFrequencyData, atau null bila tidak sedang memutar.
+  function update(state,spec,dt){
+    const L=state.layout,n=L.count,bars=state.bars;
+    dt=clamp(dt,0.001,0.1);
+    let target=null,boostK=0;
+
+    if(spec&&spec.length>=L.bins){
+      // 1) energi mentah tiap batang (dB -> 0..1) dengan kompensasi tilt
+      let frameMax=0;
+      for(let b=0;b<n;b++){
+        const db=magToDb(rangeMag(spec,L.ranges[b],0.55));
+        const raw=Math.max(0,(db+L.tilt[b]-DB_FLOOR)/(DB_CEIL-DB_FLOOR));
+        state.raw[b]=raw;if(raw>frameMax)frameMax=raw;
+      }
+      const bassRaw=Math.max(0,(magToDb(rangeMag(spec,L.bass,0.5))-DB_FLOOR)/(DB_CEIL-DB_FLOOR));
+      if(bassRaw>frameMax)frameMax=bassRaw;
+
+      // 2) gain adaptif global (satu gain untuk semua batang -> karakter spektrum tetap)
+      if(state.env<0.02)state.env=frameMax;                 // awal pemutaran: langsung selaras
+      else if(frameMax>state.env)state.env+=(frameMax-state.env)*(1-Math.exp(-dt/AGC_ATTACK));
+      else state.env*=Math.exp(-dt/AGC_RELEASE);
+      const gain=0.8/Math.max(state.env,AGC_MIN);        // sisakan headroom ~25% untuk hentakan
+      state.active+=dt;
+
+      // 3) deteksi hentakan bass: kenaikan energi bass di atas rata-rata lambatnya
+      const bassLvl=Math.min(1.5,bassRaw*gain);
+      state.bassLevel=bassLvl;
+      if(state.active<WARMUP)state.bassAvg=bassLvl;        // awal lagu bukan hentakan: tetapkan rata-rata dulu
+      else state.bassAvg+=(bassLvl-state.bassAvg)*(1-Math.exp(-dt/0.35));
+      const onset=Math.max(0,bassLvl-state.bassAvg-0.03)*4.5;
+      if(onset>state.kick)state.kick+=(onset-state.kick)*(1-Math.exp(-dt/0.012));
+      else state.kick*=Math.exp(-dt/0.11);
+      state.kick=Math.min(1,state.kick);
+      boostK=state.kick;
+
+      target=state.raw;
+      for(let b=0;b<n;b++){
+        let v=Math.pow(Math.min(1,state.raw[b]*gain),1.3);
+        // penguat perkalian: batang tanpa energi tidak "dikarang" (0 x boost = 0)
+        v*=1+boostK*(0.34*L.kickW[b]+0.07);
+        state.raw[b]=Math.min(1,v);
+      }
+    }else{
+      // tidak memutar: tidak ada data -> target nol, semua nilai meluruh alami
+      state.env*=Math.exp(-dt/AGC_RELEASE);
+      state.active=0;
+      state.bassAvg*=Math.exp(-dt/0.35);
+      state.bassLevel=0;
+      state.kick*=Math.exp(-dt/0.11);
+    }
+
+    // 4) smoothing terpisah: attack cepat, release halus
+    const aUp=1-Math.exp(-dt/ATTACK_TAU),aDown=1-Math.exp(-dt/RELEASE_TAU);
+    for(let b=0;b<n;b++){
+      const t=target?target[b]:0,cur=bars[b];
+      bars[b]=cur+(t-cur)*(t>cur?aUp:aDown);
+    }
+    return state;
+  }
+  return {createLayout,createState,update};
+})();
+// ==ANALYSIS-END==
+
+/* =====================================================================
+   APLIKASI
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+// Ikon SVG (stroke/fill mengikuti warna teks tombol)
+const ICONS={"play": "<svg class=\"ic fill\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"6 3 20 12 6 21 6 3\"/></svg>", "pause": "<svg class=\"ic fill\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"14\" y=\"4\" width=\"4\" height=\"16\" rx=\"1\"/><rect x=\"6\" y=\"4\" width=\"4\" height=\"16\" rx=\"1\"/></svg>", "skip-back": "<svg class=\"ic fill\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"19 20 9 12 19 4 19 20\"/><line x1=\"5\" x2=\"5\" y1=\"19\" y2=\"5\"/></svg>", "skip-forward": "<svg class=\"ic fill\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"5 4 15 12 5 20 5 4\"/><line x1=\"19\" x2=\"19\" y1=\"5\" y2=\"19\"/></svg>", "shuffle": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m18 14 4 4-4 4\"/><path d=\"m18 2 4 4-4 4\"/><path d=\"M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22\"/><path d=\"M2 6h1.972a4 4 0 0 1 3.6 2.2\"/><path d=\"M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45\"/></svg>", "repeat": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m17 2 4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\"/><path d=\"m7 22-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/></svg>", "volume-2": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"11 5 6 9 2 9 2 15 6 15 11 19 11 5\"/><path d=\"M15.54 8.46a5 5 0 0 1 0 7.07\"/><path d=\"M19.07 4.93a10 10 0 0 1 0 14.14\"/></svg>", "volume-1": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"11 5 6 9 2 9 2 15 6 15 11 19 11 5\"/><path d=\"M15.54 8.46a5 5 0 0 1 0 7.07\"/></svg>", "volume-x": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"11 5 6 9 2 9 2 15 6 15 11 19 11 5\"/><line x1=\"22\" x2=\"16\" y1=\"9\" y2=\"15\"/><line x1=\"16\" x2=\"22\" y1=\"9\" y2=\"15\"/></svg>", "music": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M9 18V5l12-2v13\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"18\" cy=\"16\" r=\"3\"/></svg>", "plus": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg>", "pencil": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z\"/><path d=\"m15 5 4 4\"/></svg>", "x": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/></svg>", "sparkles": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z\"/></svg>", "image": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\"/><circle cx=\"9\" cy=\"9\" r=\"2\"/><path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\"/></svg>"};
+const icon=n=>ICONS[n]||'';
+function setPlayIcon(on){const b=$('play');b.innerHTML=icon(on?'pause':'play');b.dataset.state=on?'playing':'paused';b.title=on?'Jeda':'Putar';b.setAttribute('aria-label',b.title)}
+function setVolIcon(v){$('volIcon').innerHTML=icon(v<=0?'volume-x':v<0.4?'volume-1':'volume-2')}
+const audio = $('audio');
+let tracks = [], selected = -1, coverData = '', coverTask = Promise.resolve();
+let audioContext = null, analyser = null, sourceNode = null, gainNode = null, fftData = null;
+let graphFailed = false;
+let repeat = false, shuffle = false, lastOrder = 0;
+const defaultCover = $('cover').src;
+$('preview').src = defaultCover;
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isNarrow = () => window.matchMedia('(max-width:1000px)').matches;
+
+function timeFmt(t){return Number.isFinite(t)?Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0'):'0:00'}
+function setStatus(s){$('status').textContent=s}
+let toastTimer=0;
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3200)}
+// notify = status di player + toast (terlihat juga di HP, tempat form berada jauh di bawah)
+function notify(msg){setStatus(msg);toast(msg)}
+function resetTimeUI(){$('progress').value=0;$('currentTime').textContent='0:00';$('duration').textContent='0:00'}
+
+function openTab(tab,scroll){
+  $('tab-add').classList.toggle('active',tab==='add');
+  $('tab-edit').classList.toggle('active',tab==='edit');
+  $('addForm').classList.toggle('active',tab==='add');
+  $('editForm').classList.toggle('active',tab==='edit');
+  if(tab==='edit')fillEdit();
+  if(scroll&&isNarrow())$('tab-add').scrollIntoView({behavior:'smooth',block:'center'});
+}
+window.openTab = openTab;
+
+/* ---------- Penyimpanan permanen (IndexedDB) - opsional & aman bila diblokir ---------- */
+const Store=(()=>{
+  let dbp=null;
+  function open(){
+    if(dbp)return dbp;
+    dbp=new Promise(res=>{
+      try{
+        const idb=window.indexedDB;if(!idb)return res(null);
+        const rq=idb.open('roblox-wave',1);
+        rq.onupgradeneeded=()=>{rq.result.createObjectStore('tracks',{keyPath:'uid'})};
+        rq.onsuccess=()=>res(rq.result);
+        rq.onerror=()=>res(null);rq.onblocked=()=>res(null);
+      }catch(e){res(null)}
+    });
+    return dbp;
+  }
+  async function tx(mode,fn){
+    const db=await open();if(!db)return null;
+    return new Promise(res=>{
+      try{
+        const t=db.transaction('tracks',mode),r=fn(t.objectStore('tracks'));
+        t.oncomplete=()=>res(r&&r.result!==undefined?r.result:true);
+        t.onerror=t.onabort=()=>res(null);
+      }catch(e){res(null)}
+    });
+  }
+  return {available:async()=>!!(await open()),all:()=>tx('readonly',s=>s.getAll()),
+          put:rec=>tx('readwrite',s=>s.put(rec)),del:uid=>tx('readwrite',s=>s.delete(uid))};
+})();
+let persistWarned=false;
+async function persist(t){
+  const ok=await Store.put({uid:t.uid,order:t.order,name:t.name,id:t.id,cover:t.cover,blob:t.file});
+  if(!ok&&!persistWarned){persistWarned=true;toast('Lagu tidak bisa disimpan permanen di browser ini; playlist hilang jika halaman ditutup.')}
+}
+function newTrack(o){
+  lastOrder=Math.max(Date.now(),lastOrder+1);
+  return Object.assign({uid:'t'+lastOrder.toString(36)+Math.random().toString(36).slice(2,7),order:lastOrder},o);
+}
+(async()=>{
+  const rows=await Store.all();
+  if(!Array.isArray(rows)||!rows.length)return;
+  rows.sort((a,b)=>a.order-b.order);
+  const loaded=rows.filter(r=>r&&r.blob).map(r=>({uid:r.uid,order:r.order,name:r.name,id:r.id||'—',
+    cover:r.cover||defaultCover,file:r.blob,url:URL.createObjectURL(r.blob)}));
+  if(!loaded.length)return;
+  lastOrder=Math.max(lastOrder,...loaded.map(t=>t.order));
+  tracks=loaded.concat(tracks);if(selected>=0)selected+=loaded.length;
+  renderPlaylist();setStatus(loaded.length+' lagu dimuat dari penyimpanan browser.');
+})();
+
+/* ---------- Gambar cover: diperkecil agar ringan ---------- */
+function readCover(file){
+  return new Promise(res=>{
+    const fallback=()=>{const r=new FileReader();r.onload=()=>res(String(r.result||''));r.onerror=()=>res('');r.readAsDataURL(file)};
+    let u=null;
+    try{
+      u=URL.createObjectURL(file);const img=new Image();
+      img.onload=()=>{
+        try{
+          if(!img.naturalWidth||!img.naturalHeight)throw new Error('size');
+          const s=Math.min(1,512/Math.max(img.naturalWidth,img.naturalHeight));
+          const c=document.createElement('canvas');
+          c.width=Math.max(1,Math.round(img.naturalWidth*s));c.height=Math.max(1,Math.round(img.naturalHeight*s));
+          c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+          res(c.toDataURL(/png|gif|webp|svg/.test(file.type)?'image/png':'image/jpeg',0.88));
+        }catch(e){fallback()}finally{URL.revokeObjectURL(u)}
+      };
+      img.onerror=()=>{URL.revokeObjectURL(u);fallback()};
+      img.src=u;
+    }catch(e){if(u)URL.revokeObjectURL(u);fallback()}
+  });
+}
+$('imageFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  coverTask=readCover(f).then(d=>{if(d){coverData=d;$('preview').src=d}});
+});
+
+/* ---------- Audio pipeline ----------
+   audio -> MediaElementSource -> Analyser -> Gain(volume) -> destination
+   Dibuat SEKALI (createMediaElementSource hanya boleh sekali per elemen). */
+function initAudioGraph(){
+  if(audioContext)return true;
+  if(graphFailed)return false;
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC){graphFailed=true;setStatus('Browser ini belum mendukung visualizer audio. Lagu tetap bisa diputar.');return false}
+  let ctxTmp=null;
+  try{
+    ctxTmp=new AC();
+    const an=ctxTmp.createAnalyser();
+    an.fftSize=4096;                 // ~10,8 Hz per bin pada 44,1 kHz
+    an.smoothingTimeConstant=0.35;   // rendah: smoothing utama dilakukan sendiri (attack/release terpisah)
+    an.minDecibels=-100;an.maxDecibels=-20;
+    const g=ctxTmp.createGain();g.gain.value=Number($('volume').value);
+    const src=ctxTmp.createMediaElementSource(audio);
+    src.connect(an);an.connect(g);g.connect(ctxTmp.destination);
+    audioContext=ctxTmp;analyser=an;gainNode=g;sourceNode=src;
+    fftData=new Float32Array(an.frequencyBinCount);
+    audio.volume=1;                  // volume dikendalikan GainNode (setelah analyser)
+    return true;
+  }catch(err){
+    graphFailed=true;
+    if(ctxTmp&&!sourceNode){try{ctxTmp.close()}catch(_){}} // sumber belum terhubung -> audio native tetap bersuara
+    audioContext=null;analyser=null;gainNode=null;fftData=null;
+    setStatus('Visualizer tidak dapat diaktifkan. Lagu tetap bisa diputar.');
+    return false;
+  }
+}
+function setVolume(v){
+  if(gainNode)gainNode.gain.value=v;else audio.volume=v;
+}
+
+/* ---------- Tambah lagu (tanpa <form>: tidak diblokir iframe sandbox) ---------- */
+async function addTrack(){
+  await coverTask;
+  const file=$('audioFile').files[0],name=$('nameInput').value.trim(),id=$('idInput').value.trim();
+  if(!name){notify('Isi nama lagu terlebih dahulu.');$('nameInput').focus();return}
+  if(id&&!/^\d+$/.test(id)){notify('Audio ID harus berupa angka.');$('idInput').focus();return}
+  if(!file){notify('Pilih file audio (MP3 / WAV) terlebih dahulu.');return}
+  if(!file.size){notify('File audio kosong. Pilih file lain.');return}
+  const t=newTrack({name,id:id||'—',cover:coverData||defaultCover,file,url:URL.createObjectURL(file)});
+  tracks.push(t);
+  loadTrack(tracks.length-1,false);
+  $('nameInput').value='';$('idInput').value='';$('audioFile').value='';$('imageFile').value='';
+  coverData='';$('preview').src=defaultCover;
+  notify('"'+name+'" ditambahkan ke playlist.');
+  if(isNarrow())$('cover').scrollIntoView({behavior:'smooth',block:'center'});
+  persist(t);
+}
+$('addBtn').addEventListener('click',addTrack);
+['nameInput','idInput'].forEach(k=>$(k).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addTrack()}}));
+
+function renderPlaylist(){
+  $('count').textContent=tracks.length;const list=$('playlist');list.replaceChildren();
+  if(!tracks.length){
+    const e=document.createElement('div');e.className='empty';
+    const ib=document.createElement('span');ib.className='ic-big';ib.innerHTML=icon('music');
+    e.append(ib,document.createElement('br'),'Belum ada lagu.',document.createElement('br'),'Tambahkan lagu di sebelah kanan!');
+    list.append(e);return
+  }
+  tracks.forEach((t,i)=>{
+    const row=document.createElement('div');row.className='track'+(i===selected?' active':'');
+    row.addEventListener('click',()=>{
+      if(i===selected&&audio.getAttribute('src')){audio.paused?playAudio():pauseAudio()} // klik lagu aktif = play/pause
+      else loadTrack(i,true);
+    });
+    const img=document.createElement('img');img.className='thumb';img.src=t.cover;img.alt='';
+    const info=document.createElement('div');info.className='track-info';
+    const name=document.createElement('div');name.className='track-name';name.textContent=t.name;
+    const id=document.createElement('div');id.className='track-id';id.textContent='ID: '+t.id;
+    const del=document.createElement('button');del.className='delete';del.innerHTML=icon('x');del.title='Hapus lagu';del.setAttribute('aria-label','Hapus lagu');del.type='button';
+    del.addEventListener('click',ev=>{ev.stopPropagation();removeTrack(i)});
+    info.append(name,id);row.append(img,info,del);list.append(row);
+  });
+}
+function updateMediaSession(t){
+  if(!('mediaSession' in navigator)||typeof MediaMetadata==='undefined')return;
+  try{navigator.mediaSession.metadata=new MediaMetadata({title:t?t.name:'ROBLOX.WAVE',artist:t&&t.id!=='—'?'Audio ID '+t.id:'ROBLOX.WAVE',
+    artwork:t&&/^data:image/.test(t.cover)?[{src:t.cover}]:[]})}catch(e){}
+}
+function loadTrack(i,autoplay){
+  if(i<0||i>=tracks.length)return;
+  selected=i;const t=tracks[i];audio.pause();audio.src=t.url;audio.load();
+  $('cover').src=t.cover;$('songTitle').textContent=t.name;$('songId').textContent='AUDIO ID: '+t.id;
+  resetTimeUI();updateMediaSession(t);
+  renderPlaylist();
+  if($('editForm').classList.contains('active'))fillEdit();
+  if(autoplay)playAudio();
+}
+async function playAudio(){
+  if(selected<0){setStatus('Tambahkan lagu terlebih dahulu.');return}
+  initAudioGraph(); // jika gagal, audio tetap diputar lewat elemen <audio> biasa
+  try{
+    if(audioContext&&audioContext.state!=='running')await audioContext.resume();
+    await audio.play();setStatus('Now playing');
+  }catch(err){
+    if(err&&err.name==='AbortError')return; // dibatalkan karena pergantian lagu
+    setStatus('Tidak bisa memutar audio. Coba pilih file audio lain.');
+  }
+}
+function pauseAudio(){audio.pause();setStatus('Playback dijeda.')}
+function prevTrack(){
+  if(!tracks.length)return;
+  if(audio.currentTime>3){audio.currentTime=0;return} // seperti pemutar musik pada umumnya
+  loadTrack((selected-1+tracks.length)%tracks.length,true);
+}
+$('play').addEventListener('click',()=>audio.paused?playAudio():pauseAudio());
+$('prev').addEventListener('click',prevTrack);
+$('next').addEventListener('click',nextTrack);
+$('shuffle').addEventListener('click',()=>{shuffle=!shuffle;$('shuffle').style.color=shuffle?'#d5a8ff':'';setStatus(shuffle?'Acak playlist aktif.':'Acak playlist mati.')});
+$('repeat').addEventListener('click',()=>{repeat=!repeat;audio.loop=repeat;$('repeat').style.color=repeat?'#d5a8ff':'';setStatus(repeat?'Ulangi lagu aktif.':'Ulangi lagu mati.')});
+function nextTrack(){
+  if(!tracks.length)return;let n=selected<0?0:selected;
+  if(shuffle&&tracks.length>1){while(n===selected)n=Math.floor(Math.random()*tracks.length)}
+  else n=(selected+1)%tracks.length;
+  loadTrack(n,true);
+}
+function removeTrack(i){
+  const t=tracks[i];URL.revokeObjectURL(t.url);tracks.splice(i,1);Store.del(t.uid);
+  if(selected===i){
+    audio.pause();selected=-1;audio.removeAttribute('src');audio.load();
+    $('songTitle').textContent='Midnight in Roblox';$('songId').textContent='AUDIO ID: —';$('cover').src=defaultCover;
+    resetTimeUI();setStatus('Pilih lagu untuk memulai.');updateMediaSession(null);
+    if($('editForm').classList.contains('active'))fillEdit();
+  }
+  else if(selected>i)selected--;
+  renderPlaylist();
+}
+// Tombol play/pause selalu mengikuti keadaan elemen audio yang sebenarnya.
+audio.addEventListener('play',()=>{
+  setPlayIcon(true);
+  if(audioContext&&audioContext.state==='suspended')audioContext.resume().catch(()=>{});
+});
+audio.addEventListener('pause',()=>{setPlayIcon(false)});
+audio.addEventListener('error',()=>{
+  if(!audio.getAttribute('src'))return;
+  setPlayIcon(false);setStatus('File audio gagal dimuat atau formatnya tidak didukung browser.');
+});
+audio.addEventListener('ended',()=>{
+  if(repeat)return;
+  if(tracks.length>1)nextTrack();
+  else{audio.currentTime=0;$('progress').value=0;$('currentTime').textContent='0:00';setStatus('Lagu selesai.')}
+});
+audio.addEventListener('loadedmetadata',()=>{$('duration').textContent=timeFmt(audio.duration)});
+audio.addEventListener('durationchange',()=>{$('duration').textContent=timeFmt(audio.duration)});
+audio.addEventListener('timeupdate',()=>{
+  $('currentTime').textContent=timeFmt(audio.currentTime);
+  if(Number.isFinite(audio.duration)&&audio.duration>0)$('progress').value=audio.currentTime/audio.duration*1000;
+});
+$('progress').addEventListener('input',()=>{if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=Number($('progress').value)/1000*audio.duration});
+$('volume').addEventListener('input',()=>{const v=Number($('volume').value);setVolume(v);setVolIcon(v)});
+setVolIcon(Number($('volume').value));
+audio.volume=Number($('volume').value);
+if('mediaSession' in navigator){
+  const set=(a,f)=>{try{navigator.mediaSession.setActionHandler(a,f)}catch(e){}};
+  set('play',()=>{playAudio()});set('pause',pauseAudio);set('nexttrack',nextTrack);set('previoustrack',prevTrack);
+}
+
+/* ---------- Edit lagu ---------- */
+function fillEdit(){
+  const t=tracks[selected];
+  if(!t){$('editName').value='';$('editId').value='';$('editImage').value='';$('editAudio').value='';return}
+  $('editName').value=t.name;$('editId').value=t.id==='—'?'':t.id;
+  $('editImage').value='';$('editAudio').value='';
+}
+function saveEdit(){
+  if(selected<0){notify('Pilih lagu dari playlist dahulu.');return}
+  const name=$('editName').value.trim(),id=$('editId').value.trim();
+  if(!name){notify('Nama lagu tidak boleh kosong.');return}
+  if(id&&!/^\d+$/.test(id)){notify('Audio ID harus berupa angka.');return}
+  const t=tracks[selected];t.name=name;t.id=id||'—';
+  const f=$('editAudio').files[0];
+  if(f&&f.size){
+    const wasPlaying=!audio.paused;
+    audio.pause();URL.revokeObjectURL(t.url);
+    t.file=f;t.url=URL.createObjectURL(f);audio.src=t.url;audio.load();resetTimeUI();
+    $('editAudio').value='';
+    if(wasPlaying)playAudio();
+  }
+  $('songTitle').textContent=name;$('songId').textContent='AUDIO ID: '+t.id;
+  updateMediaSession(t);renderPlaylist();persist(t);
+  notify('Perubahan berhasil disimpan.');
+}
+$('editBtn').addEventListener('click',saveEdit);
+['editName','editId'].forEach(k=>$(k).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveEdit()}}));
+$('editImage').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(selected<0){notify('Pilih lagu dari playlist dahulu.');e.target.value='';return}
+  const t=tracks[selected];
+  readCover(f).then(d=>{
+    if(!d||!tracks.includes(t))return;
+    t.cover=d;if(tracks[selected]===t){$('cover').src=d;updateMediaSession(t)}
+    renderPlaylist();persist(t);
+  });
+});
+
+/* ---------- Visualizer (membaca spektrum audio asli) ---------- */
+const canvas=$('visualizer'),ctx=canvas.getContext('2d'),coverEl=$('cover');
+let W=1,H=1,dpr=1,barGrad=null,barCount=64;
+let vizState=null,vizKey='',lastT=0;
+
+function resizeCanvas(){
+  const r=canvas.getBoundingClientRect();
+  dpr=Math.min(window.devicePixelRatio||1,3);
+  W=Math.max(1,Math.round(r.width*dpr));H=Math.max(1,Math.round(r.height*dpr));
+  if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H}
+  barCount=r.width<420?40:64;
+  // satu gradien untuk semua batang: warna ditentukan oleh tinggi absolut
+  barGrad=ctx.createLinearGradient(0,H,0,H*0.06);
+  barGrad.addColorStop(0,'#6540bf');barGrad.addColorStop(0.55,'#a16aff');barGrad.addColorStop(1,'#f2b1ff');
+}
+window.addEventListener('resize',resizeCanvas);
+if(window.ResizeObserver)new ResizeObserver(resizeCanvas).observe(canvas);
+resizeCanvas();
+
+function ensureViz(){
+  const sr=audioContext?audioContext.sampleRate:44100,fft=analyser?analyser.fftSize:4096;
+  const key=barCount+'|'+sr+'|'+fft;
+  if(key!==vizKey){vizKey=key;vizState=SpectrumAnalyzer.createState(SpectrumAnalyzer.createLayout(barCount,sr,fft))}
+}
+
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt=lastT?(now-lastT)/1000:0.016;lastT=now;
+  ensureViz();
+
+  const playing=!!(analyser&&fftData&&audioContext&&audioContext.state==='running'&&!audio.paused&&!audio.ended);
+  if(playing){try{analyser.getFloatFrequencyData(fftData)}catch(_){}}
+  SpectrumAnalyzer.update(vizState,playing?fftData:null,dt);
+
+  const bars=vizState.bars,n=bars.length,kick=vizState.kick;
+  ctx.clearRect(0,0,W,H);
+
+  // geometri konsisten dalam piksel perangkat, dipusatkan -> tidak ada batang terpotong
+  const gap=Math.max(1,Math.round(1.6*dpr));
+  const bw=Math.max(1,Math.floor((W-gap*(n-1))/n));
+  const used=bw*n+gap*(n-1),x0=Math.max(0,Math.floor((W-used)/2));
+  const maxH=H*0.94,stub=Math.max(1,Math.round(1.5*dpr));
+
+  ctx.fillStyle=barGrad;
+  ctx.shadowColor='#b37aff';
+  ctx.shadowBlur=(playing?5+22*kick:2)*dpr;   // glow mengikuti energi bass terdeteksi
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const bh=Math.max(stub,Math.round(bars[i]*maxH));
+    ctx.rect(x0+i*(bw+gap),H-bh,bw,bh);
+  }
+  ctx.fill();
+
+  ctx.shadowBlur=0;
+  ctx.fillStyle='rgba(201,157,255,0.28)';
+  ctx.fillRect(0,H-1,W,1);
+
+  // cover berdenyut halus mengikuti kick (nol bila tidak ada hentakan)
+  if(!reduceMotion){
+    coverEl.style.transform=kick>0.003?'scale('+(1+0.035*kick).toFixed(4)+')':'';
+    coverEl.style.boxShadow='0 0 '+(28+34*kick).toFixed(1)+'px rgba(146,86,255,'+(0.31+0.4*kick).toFixed(3)+')';
+  }
+}
+requestAnimationFrame(frame);
+renderPlaylist();
+</script>
+</body>
+</html>
