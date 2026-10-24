@@ -74,6 +74,49 @@ label{display:block;font-size:12px;margin:15px 0 7px;color:#ddd4f4}
 .delete .ic{width:16px;height:16px}
 .delete:hover{color:#fff}
 .muted .ic{width:13px;height:13px;vertical-align:-2px}
+.upload-btns{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+button.file-label{color:var(--text)}
+.file-label:hover{border-color:var(--purple)}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(6,4,14,.78);display:flex;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(3px)}
+.modal[hidden]{display:none}
+.modal-box{width:min(760px,100%);max-height:min(88vh,760px);display:flex;flex-direction:column;gap:12px;background:#12101f;border:1px solid #5a3f94;border-radius:19px;padding:18px;box-shadow:0 0 40px #7a4cf040}
+.modal-head{display:flex;align-items:center;justify-content:space-between}
+.modal-search{display:flex;gap:8px}
+.modal-search .field{flex:1}
+.modal-status{min-height:16px;line-height:1.5}
+.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px;overflow:auto;min-height:60px;padding:4px;flex:1}
+.img-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;background:transparent;border:0;padding:4px;border-radius:14px}
+.img-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:50%;border:2px solid #4a3a72;background:#201833;opacity:0;transition:opacity .25s,border-color .15s,box-shadow .15s}
+.img-item.loaded img{opacity:1}
+.img-item:hover img{border-color:#9465ed}
+.img-item.selected img{border-color:#c9a2ff;box-shadow:0 0 0 2px #6f46c9,0 0 18px #a875ff90}
+.img-cap{font-size:10px;color:var(--muted)}
+.img-check{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:linear-gradient(120deg,#b17bff,#7445ed);display:none;align-items:center;justify-content:center;font-size:13px}
+.img-item.selected .img-check{display:flex}
+.modal-url{display:flex;gap:8px}
+.modal-url .field{flex:1}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px}
+.modal-foot .tab{flex:none;padding:10px 16px}
+.add:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:620px){.modal{padding:8px;align-items:flex-end}.modal-box{max-height:92vh;border-radius:19px 19px 14px 14px}.img-grid{grid-template-columns:repeat(auto-fill,minmax(88px,1fr))}}
+.exp-box{align-items:stretch}
+[hidden]{display:none!important}
+.modal-box{overflow:auto}
+#expCanvas{height:min(340px,34vh);width:auto;aspect-ratio:1;align-self:center;flex-shrink:0;border-radius:14px;border:1px solid #3d2d66;background:#090914}
+#expVideo{height:min(340px,34vh);width:auto;aspect-ratio:1;align-self:center;flex-shrink:0;border-radius:14px;background:#000}
+.exp-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.exp-row select{background:#1a1730;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit}
+.exp-row progress,.exp-row .bar{flex:1}
+.exp-list{max-height:min(230px,28vh);overflow:auto;border:1px solid var(--line);border-radius:12px;padding:4px;display:flex;flex-direction:column;gap:3px}
+.exp-item{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:9px;cursor:pointer;font-size:13px}
+.exp-item:hover{background:#1d1932}
+.exp-item input{accent-color:var(--purple);width:17px;height:17px;flex:none}
+.exp-item .thumb{width:32px;height:32px}
+.exp-item span{min-width:0;overflow-wrap:anywhere}
+.exp-res{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:12px}
+.exp-res .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.exp-res.err{border-color:#7a3150;color:#ffb3c8}
+.exp-res button{flex:none;padding:7px 11px;font-size:12px}
 .toast{position:fixed;left:50%;top:18px;transform:translateX(-50%) translateY(-16px);background:#2b1d45;border:1px solid var(--purple);color:var(--text);padding:11px 16px;border-radius:12px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:50;max-width:90vw;box-shadow:0 0 22px #9256ff50;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style>
@@ -101,13 +144,14 @@ label{display:block;font-size:12px;margin:15px 0 7px;color:#ddd4f4}
       <button class="control" id="shuffle" title="Acak" aria-label="Acak"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/></svg></button><button class="control" id="prev" title="Sebelumnya" aria-label="Sebelumnya"><svg class="ic fill" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/></svg></button><button class="control main" id="play" title="Putar" aria-label="Putar" data-state="paused"><svg class="ic fill" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon points="6 3 20 12 6 21 6 3"/></svg></button><button class="control" id="next" title="Berikutnya" aria-label="Berikutnya"><svg class="ic fill" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></svg></button><button class="control" id="repeat" title="Ulangi" aria-label="Ulangi"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></button>
     </div>
     <div class="status" id="status">Pilih lagu untuk memulai.</div>
+      <div style="text-align:center;margin-top:12px"><button type="button" class="file-label" id="exportBtn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Ekspor video MP4 (1:1)</button></div>
     <audio id="audio" preload="metadata"></audio>
   </main>
   <aside class="panel right-panel">
     <div class="tabs"><button id="tab-add" class="tab active" onclick="openTab('add')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Tambah</button><button id="tab-edit" class="tab" onclick="openTab('edit')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg> Edit</button></div>
     <div id="addForm" class="form active">
       <h2>Tambah lagu</h2><label>Gambar cover bulat</label>
-      <div class="upload-row"><img id="preview" class="image-preview" alt="Preview cover" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23201937'/%3E%3Cg transform='translate(50.0 50.0) scale(1.8) translate(-12 -12)' fill='none' stroke='%23c69aff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M9 18V5l12-2v13%22/%3E%3Ccircle cx=%226%22 cy=%2218%22 r=%223%22/%3E%3Ccircle cx=%2218%22 cy=%2216%22 r=%223%22/%3E%3C/g%3E%3C/svg%3E"><label class="file-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> Pilih gambar<input id="imageFile" type="file" accept="image/*"></label></div>
+      <div class="upload-row"><img id="preview" class="image-preview" alt="Preview cover" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23201937'/%3E%3Cg transform='translate(50.0 50.0) scale(1.8) translate(-12 -12)' fill='none' stroke='%23c69aff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M9 18V5l12-2v13%22/%3E%3Ccircle cx=%226%22 cy=%2218%22 r=%223%22/%3E%3Ccircle cx=%2218%22 cy=%2216%22 r=%223%22/%3E%3C/g%3E%3C/svg%3E"><div class="upload-btns"><label class="file-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> Pilih gambar<input id="imageFile" type="file" accept="image/*"></label><button type="button" class="file-label" id="webImgBtn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> Cari di web</button></div></div>
       <label>Nama lagu</label><input class="field" id="nameInput" maxlength="100" placeholder="Contoh: Space Song">
       <label>Roblox Audio ID</label><input class="field" id="idInput" inputmode="numeric" placeholder="Contoh: 1234567890">
       <label>File audio (MP3 / WAV)</label><input class="field" id="audioFile" type="file" accept="audio/*">
@@ -119,12 +163,36 @@ label{display:block;font-size:12px;margin:15px 0 7px;color:#ddd4f4}
       <label>Nama lagu</label><input class="field" id="editName" maxlength="100">
       <label>Roblox Audio ID</label><input class="field" id="editId" inputmode="numeric">
       <label>Ganti gambar cover</label><input class="field" id="editImage" type="file" accept="image/*">
+      <button type="button" class="file-label" id="webImgBtnEdit" style="margin-top:9px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> Cari gambar di web</button>
       <label>Ganti file audio (opsional)</label><input class="field" id="editAudio" type="file" accept="audio/*">
       <button class="add submit" id="editBtn" type="button">Simpan perubahan</button><div class="note">Perubahan berlaku pada lagu yang sedang dipilih.</div>
     </div>
     <div class="note">ROBLOX.WAVE<br>Personal music player · Purple edition</div>
   </aside>
 </div>
+</div>
+<div id="imgModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="imgModalTitle">
+  <div class="modal-box">
+    <div class="modal-head"><h2 id="imgModalTitle">Cari gambar cover di web</h2><button type="button" id="imgClose" class="delete" aria-label="Tutup" title="Tutup"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+    <div class="modal-search"><input class="field" id="imgQuery" placeholder="Nama lagu, artis, atau kata kunci gambar"><button type="button" class="add" id="imgSearchBtn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Cari</button></div>
+    <div class="muted modal-status" id="imgStatus" aria-live="polite"></div>
+    <div class="img-grid" id="imgGrid"></div>
+    <div class="modal-url"><input class="field" id="imgUrl" placeholder="Atau tempel URL gambar (https://…)"><button type="button" class="tab" id="imgUrlBtn" style="flex:none;padding:10px 14px">Pakai URL</button></div>
+    <div class="modal-foot"><button type="button" class="tab" id="imgCancel">Batal</button><button type="button" class="add" id="imgUse" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg> Pakai gambar ini</button></div>
+  </div>
+</div>
+<div id="expModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="expTitle">
+  <div class="modal-box exp-box">
+    <div class="modal-head"><h2 id="expTitle">Ekspor video (kotak 1:1)</h2><button type="button" id="expClose" class="delete" aria-label="Tutup" title="Tutup"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+    <div class="muted" id="expInfo"></div>
+    <div id="expPick" style="display:flex;flex-direction:column;gap:8px"><label class="exp-item" style="padding:2px 8px"><input type="checkbox" id="expAll"><span><b>Pilih semua lagu</b></span></label><div id="expList" class="exp-list"></div></div>
+    <canvas id="expCanvas" width="720" height="720"></canvas>
+    <div id="expResult" hidden class="exp-row" style="flex-direction:column;align-items:stretch"><video id="expVideo" controls playsinline hidden></video><div id="expResults" class="exp-list"></div><div class="muted" id="expResultMsg" style="text-align:center"></div></div>
+    <div class="exp-row"><label class="muted" for="expSize">Kualitas</label><select id="expSize"><option value="720" selected>720 × 720 (ringan)</option><option value="1080">1080 × 1080 (HD)</option></select></div>
+    <div id="expProg" hidden class="exp-row"><input id="expBar" class="bar" type="range" min="0" max="1000" value="0" disabled><span class="muted" id="expTime">0:00 / 0:00</span></div>
+    <div class="muted modal-status" id="expMsg" aria-live="polite"></div>
+    <div class="modal-foot"><button type="button" class="tab" id="expCancel" hidden>Batalkan</button><button type="button" class="tab" id="expAgain" hidden>Ekspor lagi</button><button type="button" class="add" id="expStart"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> <span id="expStartLabel">Mulai ekspor</span></button><button type="button" class="add" id="expDownload"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> <span id="expDlLabel">Unduh video</span></button></div>
+  </div>
 </div>
 <script>
 /* =====================================================================
@@ -258,6 +326,7 @@ const $ = id => document.getElementById(id);
 // Ikon SVG (stroke/fill mengikuti warna teks tombol)
 const ICONS={"play": "<svg class=\"ic fill\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"6 3 20 12 6 21 6 3\"/></svg>", "pause": "<svg class=\"ic fill\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"14\" y=\"4\" width=\"4\" height=\"16\" rx=\"1\"/><rect x=\"6\" y=\"4\" width=\"4\" height=\"16\" rx=\"1\"/></svg>", "skip-back": "<svg class=\"ic fill\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"19 20 9 12 19 4 19 20\"/><line x1=\"5\" x2=\"5\" y1=\"19\" y2=\"5\"/></svg>", "skip-forward": "<svg class=\"ic fill\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"5 4 15 12 5 20 5 4\"/><line x1=\"19\" x2=\"19\" y1=\"5\" y2=\"19\"/></svg>", "shuffle": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m18 14 4 4-4 4\"/><path d=\"m18 2 4 4-4 4\"/><path d=\"M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22\"/><path d=\"M2 6h1.972a4 4 0 0 1 3.6 2.2\"/><path d=\"M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45\"/></svg>", "repeat": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m17 2 4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\"/><path d=\"m7 22-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/></svg>", "volume-2": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"11 5 6 9 2 9 2 15 6 15 11 19 11 5\"/><path d=\"M15.54 8.46a5 5 0 0 1 0 7.07\"/><path d=\"M19.07 4.93a10 10 0 0 1 0 14.14\"/></svg>", "volume-1": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"11 5 6 9 2 9 2 15 6 15 11 19 11 5\"/><path d=\"M15.54 8.46a5 5 0 0 1 0 7.07\"/></svg>", "volume-x": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"11 5 6 9 2 9 2 15 6 15 11 19 11 5\"/><line x1=\"22\" x2=\"16\" y1=\"9\" y2=\"15\"/><line x1=\"16\" x2=\"22\" y1=\"9\" y2=\"15\"/></svg>", "music": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M9 18V5l12-2v13\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"18\" cy=\"16\" r=\"3\"/></svg>", "plus": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg>", "pencil": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z\"/><path d=\"m15 5 4 4\"/></svg>", "x": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/></svg>", "sparkles": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z\"/></svg>", "image": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\"/><circle cx=\"9\" cy=\"9\" r=\"2\"/><path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\"/></svg>"};
 const icon=n=>ICONS[n]||'';
+Object.assign(ICONS,{"search": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg>", "globe": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20\"/><path d=\"M2 12h20\"/></svg>", "check": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M20 6 9 17l-5-5\"/></svg>"});
 function setPlayIcon(on){const b=$('play');b.innerHTML=icon(on?'pause':'play');b.dataset.state=on?'playing':'paused';b.title=on?'Jeda':'Putar';b.setAttribute('aria-label',b.title)}
 function setVolIcon(v){$('volIcon').innerHTML=icon(v<=0?'volume-x':v<0.4?'volume-1':'volume-2')}
 const audio = $('audio');
@@ -628,6 +697,524 @@ function frame(now){
 }
 requestAnimationFrame(frame);
 renderPlaylist();
+
+/* =====================================================================
+   CARI GAMBAR DI WEB (untuk cover)
+   Sumber: iTunes Search (cover album, via JSONP karena tidak mendukung CORS)
+           Wikimedia Commons (via fetch + origin=*)
+   ===================================================================== */
+const IMG_MAX_PER_SOURCE=24;
+let imgTarget='add',imgSel=null,imgToken=0,imgBusy=false;
+
+function fetchWithTimeout(url,ms,opts){
+  const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),ms);
+  return fetch(url,Object.assign({signal:ac.signal},opts||{})).finally(()=>clearTimeout(tm));
+}
+function jsonp(url,ms){
+  return new Promise((res,rej)=>{
+    const cb='__rwjsonp_'+Math.random().toString(36).slice(2),s=document.createElement('script');
+    const clean=()=>{clearTimeout(tm);try{delete window[cb]}catch(_){window[cb]=undefined}s.remove()};
+    const tm=setTimeout(()=>{clean();rej(new Error('timeout'))},ms||10000);
+    window[cb]=d=>{clean();res(d)};
+    s.onerror=()=>{clean();rej(new Error('network'))};
+    s.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
+    document.head.appendChild(s);
+  });
+}
+const httpsOnly=u=>typeof u==='string'&&/^https:\/\//i.test(u);
+
+async function searchItunes(q){
+  const url='https://itunes.apple.com/search?'+new URLSearchParams({term:q,media:'music',entity:'song',limit:'60'});
+  const d=await jsonp(url,10000);
+  const seen=new Set(),out=[];
+  for(const r of (d&&d.results)||[]){
+    const a=r&&r.artworkUrl100;if(!httpsOnly(a))continue;
+    const key=r.collectionId!=null?r.collectionId:a;if(seen.has(key))continue;seen.add(key);
+    const size=n=>/\d+x\d+bb/.test(a)?a.replace(/\d+x\d+bb/,n+'x'+n+'bb'):a;
+    out.push({thumb:size(200),full:size(600),title:[r.trackName,r.artistName].filter(Boolean).join(' — '),source:'iTunes'});
+    if(out.length>=IMG_MAX_PER_SOURCE)break;
+  }
+  return out;
+}
+async function searchCommons(q){
+  const url='https://commons.wikimedia.org/w/api.php?'+new URLSearchParams({action:'query',format:'json',origin:'*',
+    generator:'search',gsrnamespace:'6',gsrsearch:q,gsrlimit:'40',prop:'imageinfo',iiprop:'url|mime',iiurlwidth:'600'});
+  const r=await fetchWithTimeout(url,10000);if(!r.ok)throw new Error('http '+r.status);
+  const d=await r.json();
+  const pages=Object.values((d&&d.query&&d.query.pages)||{}).sort((a,b)=>(a.index||0)-(b.index||0));
+  const out=[];
+  for(const p of pages){
+    const ii=p.imageinfo&&p.imageinfo[0];
+    if(!ii||!/^image\/(jpeg|png|webp)$/.test(ii.mime||'')||!httpsOnly(ii.thumburl))continue;
+    out.push({thumb:ii.thumburl,full:ii.thumburl,title:String(p.title||'').replace(/^File:/,'').replace(/\.\w+$/,''),source:'Wikimedia'});
+    if(out.length>=IMG_MAX_PER_SOURCE)break;
+  }
+  return out;
+}
+
+function imgStatus(msg){$('imgStatus').textContent=msg}
+function openImgModal(target){
+  if(target==='edit'&&!tracks[selected]){notify('Pilih lagu dari playlist dahulu.');return}
+  imgTarget=target;imgSel=null;$('imgUse').disabled=true;$('imgGrid').replaceChildren();$('imgUrl').value='';
+  const q=target==='add'?$('nameInput').value.trim():tracks[selected].name;
+  $('imgQuery').value=q;
+  imgStatus('Ketik kata kunci lalu tekan Cari.');
+  $('imgModal').hidden=false;document.body.style.overflow='hidden';
+  if(q)searchImages();else $('imgQuery').focus();
+}
+function closeImgModal(){
+  imgToken++;$('imgModal').hidden=true;document.body.style.overflow='';
+  const b=imgTarget==='add'?$('webImgBtn'):$('webImgBtnEdit');if(b)b.focus();
+}
+function roundRobin(lists){
+  const out=[],max=Math.max(0,...lists.map(l=>l.length));
+  for(let i=0;i<max;i++)lists.forEach(l=>{if(i<l.length)out.push(l[i])});
+  return out;
+}
+async function searchImages(){
+  const q=$('imgQuery').value.trim();
+  if(!q){imgStatus('Ketik kata kunci terlebih dahulu.');$('imgQuery').focus();return}
+  const my=++imgToken;
+  imgSel=null;$('imgUse').disabled=true;$('imgGrid').replaceChildren();imgStatus('Mencari gambar…');
+  const results=await Promise.allSettled([searchItunes(q),searchCommons(q)]);
+  if(my!==imgToken)return; // pencarian lama / modal ditutup
+  const ok=results.filter(r=>r.status==='fulfilled').map(r=>r.value),failed=results.length-ok.length;
+  const items=roundRobin(ok);
+  if(!items.length){
+    imgStatus(failed===results.length
+      ?'Tidak bisa terhubung ke sumber gambar. Periksa koneksi internet (pencarian web juga tidak bisa jalan di dalam preview ber-sandbox). Anda masih bisa menempel URL gambar di bawah atau mengunggah file.'
+      :'Tidak ada gambar yang cocok. Coba kata kunci lain.');
+    return;
+  }
+  renderImgResults(items,failed);
+}
+function renderImgResults(items,failed){
+  const grid=$('imgGrid');grid.replaceChildren();let shown=0;
+  const upd=()=>imgStatus(shown+' gambar ditemukan. Klik satu untuk memilih'+(failed?' (sebagian sumber gagal dimuat)':'')+'.');
+  items.forEach(it=>{
+    const b=document.createElement('button');b.type='button';b.className='img-item';b.title=it.title+' ('+it.source+')';
+    const img=document.createElement('img');img.alt=it.title;img.loading='lazy';img.referrerPolicy='no-referrer';img.decoding='async';
+    img.addEventListener('error',()=>{if(b.isConnected){b.remove();shown--;upd()}});
+    img.addEventListener('load',()=>{b.classList.add('loaded')});
+    img.src=it.thumb;
+    const cap=document.createElement('span');cap.className='img-cap';cap.textContent=it.source;
+    const chk=document.createElement('span');chk.className='img-check';chk.innerHTML=icon('check');
+    b.append(img,cap,chk);
+    b.addEventListener('click',()=>{
+      grid.querySelectorAll('.img-item.selected').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');imgSel=it;$('imgUse').disabled=false;
+    });
+    b.addEventListener('dblclick',()=>{imgSel=it;applyWebImage(it.full)});
+    grid.append(b);shown++;
+  });
+  upd();
+}
+function checkImageLoads(url){
+  return new Promise(res=>{const i=new Image();i.referrerPolicy='no-referrer';i.onload=()=>res(true);i.onerror=()=>res(false);i.src=url});
+}
+function deliverCover(data){
+  if(imgTarget==='add'){coverData=data;coverTask=Promise.resolve();$('preview').src=data;notify('Cover dipilih. Lanjut isi nama dan file audio.')}
+  else{
+    const t=tracks[selected];if(!t)return;
+    t.cover=data;$('cover').src=data;updateMediaSession(t);renderPlaylist();persist(t);notify('Cover lagu diganti.');
+  }
+}
+async function applyWebImage(url){
+  if(imgBusy)return;
+  if(!/^https?:\/\//i.test(url)){imgStatus('URL harus diawali http:// atau https://');return}
+  imgBusy=true;$('imgUse').disabled=true;$('imgUrlBtn').disabled=true;imgStatus('Mengambil gambar…');
+  let data='',hotlink=false;
+  try{
+    // Salin & perkecil ke penyimpanan lokal bila server mengizinkan (CORS)
+    const r=await fetchWithTimeout(url,15000,{mode:'cors',referrerPolicy:'no-referrer'});
+    if(!r.ok)throw new Error('http');
+    const blob=await r.blob();if(!/^image\//.test(blob.type))throw new Error('type');
+    data=await readCover(blob);
+  }catch(e){data=''}
+  if(!data){
+    // Server tidak mengizinkan penyalinan: pakai langsung dari web bila gambarnya bisa dimuat
+    if(await checkImageLoads(url)){data=url;hotlink=true}
+  }
+  imgBusy=false;$('imgUrlBtn').disabled=false;$('imgUse').disabled=!imgSel;
+  if(!data){imgStatus('Gambar tidak bisa dimuat. Pilih gambar lain atau coba URL berbeda.');return}
+  closeImgModal();deliverCover(data);
+  if(hotlink)toast('Gambar dipakai langsung dari web (tidak bisa disalin), jadi butuh internet untuk menampilkannya.');
+}
+$('webImgBtn').addEventListener('click',()=>openImgModal('add'));
+$('webImgBtnEdit').addEventListener('click',()=>openImgModal('edit'));
+$('imgSearchBtn').addEventListener('click',searchImages);
+$('imgQuery').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchImages()}});
+$('imgUse').addEventListener('click',()=>{if(imgSel)applyWebImage(imgSel.full)});
+$('imgUrlBtn').addEventListener('click',()=>{const u=$('imgUrl').value.trim();if(!u){imgStatus('Tempel URL gambar terlebih dahulu.');return}imgSel=null;applyWebImage(u)});
+$('imgUrl').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('imgUrlBtn').click()}});
+$('imgClose').addEventListener('click',closeImgModal);
+$('imgCancel').addEventListener('click',closeImgModal);
+$('imgModal').addEventListener('mousedown',e=>{if(e.target===$('imgModal'))closeImgModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('imgModal').hidden)closeImgModal()});
+
+/* =====================================================================
+   EKSPOR VIDEO KOTAK 1:1 (cover + nama + Audio ID + visualizer + lagu)
+   Direkam real-time lewat MediaRecorder dari analisis audio yang sama.
+   ===================================================================== */
+const EXP={run:false,cancel:false,stop:null,mode:'',results:[]};
+function pickMime(){
+  const c=['video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4;codecs=avc1,mp4a.40.2','video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  return c.find(m=>{try{return MediaRecorder.isTypeSupported(m)}catch(e){return false}})||'';
+}
+function loadCoverImg(src){return new Promise(res=>{const i=new Image();if(!/^data:/.test(src))i.crossOrigin='anonymous';i.onload=()=>res(i);i.onerror=()=>res(null);i.src=src})}
+function drawExport(g,S,o){
+  const k=S/1080,TAU=Math.PI*2;
+  g.setTransform(1,0,0,1,0,0);g.shadowBlur=0;g.fillStyle='#090914';g.fillRect(0,0,S,S);
+  const rg=g.createRadialGradient(540*k,360*k,40*k,540*k,360*k,760*k);rg.addColorStop(0,'rgba(124,72,235,.34)');rg.addColorStop(1,'rgba(124,72,235,0)');
+  g.fillStyle=rg;g.fillRect(0,0,S,S);
+  g.textAlign='left';g.textBaseline='alphabetic';
+  const cx=540*k,cy=345*k,r=190*k*(1+0.035*o.kick);
+  g.save();g.shadowColor='rgba(168,117,255,.9)';g.shadowBlur=(36+60*o.kick)*k;g.beginPath();g.arc(cx,cy,r,0,TAU);g.fillStyle='#201937';g.fill();g.restore();
+  g.save();g.beginPath();g.arc(cx,cy,r,0,TAU);g.clip();
+  if(o.cover&&o.cover.naturalWidth){const s=Math.max(2*r/o.cover.naturalWidth,2*r/o.cover.naturalHeight),w2=o.cover.naturalWidth*s,h2=o.cover.naturalHeight*s;g.drawImage(o.cover,cx-w2/2,cy-h2/2,w2,h2)}
+  else{g.translate(cx,cy);g.scale(r/30,r/30);g.translate(-12,-12);g.strokeStyle='#c69aff';g.lineWidth=1.4;g.lineCap='round';g.lineJoin='round';
+    g.stroke(new Path2D('M9 18V5l12-2v13'));[[6,18],[18,16]].forEach(p=>{g.beginPath();g.arc(p[0],p[1],3,0,TAU);g.stroke()})}
+  g.restore();
+  g.lineWidth=8*k;g.strokeStyle='#b78bff';g.beginPath();g.arc(cx,cy,r,0,TAU);g.stroke();
+  let fs=64*k,nm=String(o.name);g.textAlign='center';g.font='700 '+fs+'px system-ui,sans-serif';
+  while(g.measureText(nm).width>920*k&&fs>34*k){fs-=2*k;g.font='700 '+fs+'px system-ui,sans-serif'}
+  if(g.measureText(nm).width>920*k){while(g.measureText(nm+'…').width>920*k&&nm.length>1)nm=nm.slice(0,-1);nm=nm.trim()+'…'}
+  g.fillStyle='#fff';g.fillText(nm,540*k,640*k);
+  g.font='600 '+32*k+'px system-ui,sans-serif';g.fillStyle='#a99bd0';g.fillText('AUDIO ID: '+o.id,540*k,696*k);
+  const n=o.bars.length,base=980*k,maxH=210*k,gap=Math.max(1,Math.round(3*k)),bw=Math.max(1,Math.floor((952*k-gap*(n-1))/n)),used=bw*n+gap*(n-1),x0=Math.round(64*k+(952*k-used)/2);
+  const bg=g.createLinearGradient(0,base,0,base-maxH);bg.addColorStop(0,'#6540bf');bg.addColorStop(.55,'#a16aff');bg.addColorStop(1,'#f2b1ff');
+  g.fillStyle=bg;g.shadowColor='#b37aff';g.shadowBlur=(6+24*o.kick)*k;g.beginPath();
+  for(let i=0;i<n;i++){const bh=Math.max(Math.round(2*k),Math.round(o.bars[i]*maxH));g.rect(x0+i*(bw+gap),base-bh,bw,bh)}
+  g.fill();g.shadowBlur=0;
+  const p=o.dur?Math.min(1,o.cur/o.dur):0;
+  g.fillStyle='rgba(255,255,255,.12)';g.fillRect(64*k,1016*k,952*k,6*k);g.fillStyle='#a875ff';g.fillRect(64*k,1016*k,952*k*p,6*k);
+  g.font='500 '+24*k+'px system-ui,sans-serif';g.fillStyle='#8d82b3';g.textAlign='left';g.fillText(timeFmt(o.cur),64*k,1056*k);g.textAlign='right';g.fillText(timeFmt(o.dur),1016*k,1056*k);
+}
+function setExpUI(m){ // 'idle' | 'run' | 'done'
+  $('expPick').hidden=m!=='idle';$('expStart').hidden=m!=='idle';$('expDownload').hidden=m!=='done';$('expAgain').hidden=m!=='done';$('expCancel').hidden=m!=='run';$('expSize').disabled=m==='run';
+  $('expProg').hidden=m!=='run';$('expResult').hidden=m!=='done';$('expCanvas').hidden=m==='done';
+}
+function expBase(t){return (t.name+(t.id!=='—'?'-'+t.id:'')).replace(/[^\p{L}\p{N}_-]+/gu,'_').replace(/^_+|_+$/g,'')||'video'}
+function clearExpResults(){
+  EXP.results.forEach(r=>{if(r.url)URL.revokeObjectURL(r.url)});EXP.results=[];
+  const v=$('expVideo');v.pause();v.removeAttribute('src');v.hidden=true;$('expResults').replaceChildren();
+}
+function expChecked(){return [...$('expList').querySelectorAll('input[type=checkbox]:checked')].map(c=>Number(c.value))}
+let expPrevToken=0;
+function expSelChanged(){
+  const idx=expChecked(),n=idx.length;
+  $('expAll').checked=n>0&&n===tracks.length;$('expStart').disabled=n===0;
+  $('expStartLabel').textContent=n>1?'Ekspor '+n+' video':'Mulai ekspor';
+  $('expInfo').textContent=n+' dari '+tracks.length+' lagu dipilih';
+  const t=tracks[n?idx[0]:Math.max(selected,0)];if(!t)return;
+  const tok=++expPrevToken,cv=$('expCanvas'),g=cv.getContext('2d');
+  loadCoverImg(t.cover).then(c=>{
+    if(tok!==expPrevToken||EXP.run)return;
+    const st=SpectrumAnalyzer.createState(SpectrumAnalyzer.createLayout(64,44100,4096));
+    drawExport(g,cv.width,{bars:st.bars,kick:0,cover:c,name:t.name,id:t.id,cur:0,dur:0});
+  });
+}
+function buildExpList(){
+  const box=$('expList');box.replaceChildren();
+  tracks.forEach((t,i)=>{
+    const lab=document.createElement('label');lab.className='exp-item';
+    const cb=document.createElement('input');cb.type='checkbox';cb.value=i;cb.checked=i===Math.max(selected,0);
+    cb.addEventListener('change',expSelChanged);
+    const im=document.createElement('img');im.className='thumb';im.src=t.cover;im.alt='';
+    const sp=document.createElement('span');sp.textContent=t.name+' · ID '+t.id;
+    lab.append(cb,im,sp);box.append(lab);
+  });
+  expSelChanged();
+}
+function openExport(){
+  if(EXP.run){notify('Ekspor sebelumnya masih dihentikan, coba lagi sebentar.');return}
+  if(!tracks.length){notify('Tambahkan lagu ke playlist dahulu.');return}
+  audio.pause();clearExpResults();
+  $('expMsg').textContent='Pilih satu atau beberapa lagu, lalu ekspor. Video dibuat langsung dari file lagu dan disimpan sebagai MP4. Boleh pindah tab selama proses, tapi jangan tutup halaman ini.';
+  const cv=$('expCanvas');cv.width=cv.height=720;
+  setExpUI('idle');buildExpList();$('expModal').hidden=false;document.body.style.overflow='hidden';
+}
+function closeExport(){
+  if(EXP.run){EXP.cancel=true;if(EXP.stop)EXP.stop()}
+  $('expModal').hidden=true;document.body.style.overflow='';clearExpResults();
+}
+// Rekam real-time (cadangan bila WebCodecs tidak ada). Mengembalikan {blob,ext,note}, atau null bila dibatalkan.
+async function exportRealtime(t,S){
+  const msg=m=>{$('expMsg').textContent=m};
+  if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)throw new Error('Browser ini tidak mendukung perekaman video. Coba Chrome, Edge, atau Safari terbaru.');
+  const mime=pickMime();if(!mime)throw new Error('Browser ini tidak punya format video yang bisa direkam.');
+  const cv=$('expCanvas');cv.width=cv.height=S;const g=cv.getContext('2d');
+  let ac;try{const AC=window.AudioContext||window.webkitAudioContext;ac=new AC();ac.resume()}catch(e){throw new Error('AudioContext tidak tersedia.')}
+  msg(mime.startsWith('video/mp4')?'Merekam MP4… jangan tutup atau pindah tab.':'Merekam… (browser ini hanya bisa WebM, bukan MP4). Jangan tutup atau pindah tab.');
+  const a=new Audio();a.preload='auto';a.src=t.url;
+  let raf=0,rec=null,stream=null;const chunks=[];
+  try{
+    await new Promise((ok,bad)=>{a.onloadedmetadata=ok;a.onerror=()=>bad(new Error('file audio gagal dibaca'));setTimeout(()=>bad(new Error('waktu habis memuat audio')),15000)});
+    const cover=await loadCoverImg(t.cover),dur=Number.isFinite(a.duration)?a.duration:0;
+    const src=ac.createMediaElementSource(a),an=ac.createAnalyser();an.fftSize=4096;an.smoothingTimeConstant=0.35;
+    const dest=ac.createMediaStreamDestination();src.connect(an);an.connect(dest);
+    stream=new MediaStream([...cv.captureStream(30).getVideoTracks(),...dest.stream.getAudioTracks()]);
+    rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:S>=1080?8e6:5e6,audioBitsPerSecond:192000});
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    const stopped=new Promise(r=>{rec.onstop=r});
+    const st=SpectrumAnalyzer.createState(SpectrumAnalyzer.createLayout(64,ac.sampleRate,4096)),spec=new Float32Array(an.frequencyBinCount);
+    let last=performance.now();
+    const frameFn=now=>{
+      raf=requestAnimationFrame(frameFn);const dt=(now-last)/1000;last=now;
+      an.getFloatFrequencyData(spec);SpectrumAnalyzer.update(st,a.paused?null:spec,dt);
+      drawExport(g,S,{bars:st.bars,kick:st.kick,cover,name:t.name,id:t.id,cur:a.currentTime,dur});
+      $('expBar').value=dur?a.currentTime/dur*1000:0;$('expTime').textContent=timeFmt(a.currentTime)+' / '+timeFmt(dur);
+    };
+    drawExport(g,S,{bars:st.bars,kick:0,cover,name:t.name,id:t.id,cur:0,dur});
+    rec.start(1000);await a.play();raf=requestAnimationFrame(frameFn);
+    await new Promise(r=>{a.onended=r;EXP.stop=r});
+    await new Promise(r=>setTimeout(r,400));        // ekor: biarkan frame terakhir terekam
+    cancelAnimationFrame(raf);rec.stop();await stopped;
+    if(EXP.cancel)return null;
+    const type=mime.split(';')[0],ext=type==='video/mp4'?'mp4':'webm',blob=new Blob(chunks,{type});
+    if(!blob.size)throw new Error('hasil rekaman kosong');
+    return {blob,ext,note:ext==='webm'?'WebM (browser ini tidak bisa merekam MP4 langsung)':''};
+  }finally{
+    cancelAnimationFrame(raf);try{if(rec&&rec.state!=='inactive')rec.stop()}catch(_){}
+    if(stream)stream.getTracks().forEach(x=>x.stop());
+    try{a.pause()}catch(_){}a.removeAttribute('src');try{ac.close()}catch(_){}
+    EXP.stop=null;
+  }
+}
+function downloadResult(r){
+  if(!r||!r.url)return;
+  const a=document.createElement('a');a.href=r.url;a.download=r.base+'.'+(r.ext||'mp4');document.body.appendChild(a);a.click();a.remove();
+}
+async function downloadAll(){
+  const ok=EXP.results.filter(r=>r.url);if(!ok.length)return;
+  if(ok.length>1)toast('Jika browser menanyakan izin unduhan ganda, pilih Izinkan.');
+  for(const r of ok){downloadResult(r);await new Promise(x=>setTimeout(x,600))}
+}
+function previewResult(r){const v=$('expVideo');v.hidden=false;v.src=r.url;v.play().catch(()=>{})}
+function renderResults(){
+  const box=$('expResults');box.replaceChildren();
+  EXP.results.forEach(r=>{
+    const row=document.createElement('div');row.className='exp-res'+(r.err?' err':'');
+    const tx=document.createElement('div');tx.className='grow';
+    tx.textContent=r.err?r.name+' — gagal: '+r.err:r.name+' · '+(r.size/1048576).toFixed(1)+' MB · '+r.ext.toUpperCase()+(r.note?' · '+r.note:'');
+    row.append(tx);
+    if(!r.err){
+      const p=document.createElement('button');p.type='button';p.className='tab';p.textContent='Putar';p.addEventListener('click',()=>previewResult(r));
+      const d=document.createElement('button');d.type='button';d.className='tab';d.textContent='Unduh';d.addEventListener('click',()=>downloadResult(r));
+      row.append(p,d);
+    }
+    box.append(row);
+  });
+}
+$('exportBtn').addEventListener('click',openExport);
+$('expStart').addEventListener('click',startExport);
+$('expCancel').addEventListener('click',()=>{EXP.cancel=true;if(EXP.stop)EXP.stop()});
+$('expDownload').addEventListener('click',downloadAll);
+$('expAgain').addEventListener('click',()=>{clearExpResults();$('expCanvas').width=$('expCanvas').height=720;setExpUI('idle');$('expMsg').textContent='Pilih lagu yang ingin diekspor.';expSelChanged()});
+$('expAll').addEventListener('change',e=>{$('expList').querySelectorAll('input[type=checkbox]').forEach(c=>{c.checked=e.target.checked});expSelChanged()});
+$('expClose').addEventListener('click',closeExport);
+$('expModal').addEventListener('mousedown',e=>{if(e.target===$('expModal'))closeExport()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('expModal').hidden)closeExport()});
+document.addEventListener('visibilitychange',()=>{if(EXP.run&&EXP.mode==='realtime'&&document.hidden)toast('Tab tersembunyi: perekaman bisa membeku. Kembali ke tab ini.')});
+
+/* =====================================================================
+   EKSPOR OFFLINE (WebCodecs): tidak memutar audio & tidak memakai rAF/timer,
+   jadi tetap jalan saat pindah tab, dan lebih cepat dari durasi lagu.
+   ===================================================================== */
+// ==MUX-START==
+const _te=new TextEncoder();
+const _cat=a=>{let n=0;a.forEach(x=>n+=x.length);const o=new Uint8Array(n);let p=0;a.forEach(x=>{o.set(x,p);p+=x.length});return o};
+const _u8=(...n)=>Uint8Array.from(n),_z=n=>new Uint8Array(n);
+const _u16=n=>_u8(n>>8&255,n&255),_u32=n=>_u8(n>>>24&255,n>>>16&255,n>>>8&255,n&255);
+const _box=(t,...p)=>{const b=_cat(p);return _cat([_u32(b.length+8),_te.encode(t),b])};
+const _fbox=(t,v,f,...p)=>_box(t,_u8(v,f>>16&255,f>>8&255,f&255),...p);
+const _tag=(t,...p)=>{const b=_cat(p);return _cat([_u8(t,b.length),b])};
+const _toU8=x=>x instanceof ArrayBuffer?new Uint8Array(x):new Uint8Array(x.buffer,x.byteOffset,x.byteLength);
+const _MATRIX=_cat([_u32(0x10000),_u32(0),_u32(0),_u32(0),_u32(0x10000),_u32(0),_u32(0),_u32(0),_u32(0x40000000)]);
+
+function muxMp4(V,A){
+  const trak=(id,T,stsd,mhd,handler,off,isVideo)=>{
+    const S=T.samples,total=S.reduce((s,x)=>s+x.dur,0),runs=[];
+    S.forEach(s=>{const l=runs[runs.length-1];l&&l[1]===s.dur?l[0]++:runs.push([1,s.dur])});
+    const keys=S.map((s,i)=>s.key?i+1:0).filter(Boolean);
+    const stbl=_box('stbl',stsd,_fbox('stts',0,0,_u32(runs.length),...runs.flatMap(r=>[_u32(r[0]),_u32(r[1])])),
+      keys.length&&keys.length<S.length?_fbox('stss',0,0,_u32(keys.length),...keys.map(_u32)):_z(0),
+      _fbox('stsc',0,0,_u32(1),_u32(1),_u32(S.length),_u32(1)),
+      _fbox('stsz',0,0,_u32(0),_u32(S.length),...S.map(s=>_u32(s.d.length))),_fbox('stco',0,0,_u32(1),_u32(off)));
+    const minf=_box('minf',mhd,_box('dinf',_fbox('dref',0,0,_u32(1),_fbox('url ',0,1))),stbl);
+    const hdlr=_fbox('hdlr',0,0,_u32(0),_te.encode(handler),_z(12),_u8(0));
+    const mdia=_box('mdia',_fbox('mdhd',0,0,_u32(0),_u32(0),_u32(T.ts),_u32(total),_u16(0x55c4),_u16(0)),hdlr,minf);
+    const tkhd=_fbox('tkhd',0,3,_u32(0),_u32(0),_u32(id),_u32(0),_u32(Math.round(total/T.ts*1000)),_z(8),_u16(0),_u16(0),
+      _u16(isVideo?0:0x100),_u16(0),_MATRIX,_u32(isVideo?V.w*65536:0),_u32(isVideo?V.h*65536:0));
+    return {box:_box('trak',tkhd,mdia),ms:Math.round(total/T.ts*1000)};
+  };
+  const vEntry=V.kind==='avc'
+    ?_box('avc1',_z(6),_u16(1),_z(16),_u16(V.w),_u16(V.h),_u32(0x480000),_u32(0x480000),_u32(0),_u16(1),_z(32),_u16(0x18),_u16(0xffff),_box('avcC',V.desc))
+    :_box('vp09',_z(6),_u16(1),_z(16),_u16(V.w),_u16(V.h),_u32(0x480000),_u32(0x480000),_u32(0),_u16(1),_z(32),_u16(0x18),_u16(0xffff),
+        _fbox('vpcC',1,0,_u8(0,40,0x82),_u8(1,1,1),_u16(0)));
+  let aEntry;
+  if(A.kind==='aac'){
+    const esds=_fbox('esds',0,0,_tag(3,_u16(0),_u8(0),_tag(4,_u8(0x40,0x15,0,0,0),_u32(0),_u32(0),_tag(5,A.desc)),_tag(6,_u8(2))));
+    aEntry=_box('mp4a',_z(6),_u16(1),_z(8),_u16(A.ch),_u16(16),_u16(0),_u16(0),_u32(Math.round(A.sr*65536)>>>0),esds);
+  }else{
+    const dv=new DataView(A.desc.buffer,A.desc.byteOffset,A.desc.byteLength);   // OpusHead (little-endian) -> dOps (big-endian)
+    const dOps=_box('dOps',_u8(0,A.ch),_u16(dv.getUint16(10,true)),_u32(dv.getUint32(12,true)),_u16(0),_u8(0));
+    aEntry=_box('Opus',_z(6),_u16(1),_z(8),_u16(A.ch),_u16(16),_u16(0),_u16(0),_u32(48000*65536>>>0),dOps);
+  }
+  const ftyp=_box('ftyp',_te.encode('isom'),_u32(512),_te.encode('isomiso2avc1mp41'));
+  const build=(vo,ao)=>{
+    const v=trak(1,V,_fbox('stsd',0,0,_u32(1),vEntry),_fbox('vmhd',0,1,_z(8)),'vide',vo,true);
+    const a=trak(2,A,_fbox('stsd',0,0,_u32(1),aEntry),_fbox('smhd',0,0,_z(4)),'soun',ao,false);
+    const mvhd=_fbox('mvhd',0,0,_u32(0),_u32(0),_u32(1000),_u32(Math.max(v.ms,a.ms)),_u32(0x10000),_u16(0x100),_u16(0),_z(8),_MATRIX,_z(24),_u32(3));
+    return _box('moov',mvhd,v.box,a.box);
+  };
+  const vBytes=V.samples.reduce((s,x)=>s+x.d.length,0),aBytes=A.samples.reduce((s,x)=>s+x.d.length,0);
+  const moov0=build(0,0),base=ftyp.length+moov0.length+8;
+  const moov=build(base,base+vBytes);
+  return new Blob([ftyp,moov,_u32(8+vBytes+aBytes),_te.encode('mdat'),...V.samples.map(s=>s.d),...A.samples.map(s=>s.d)],{type:'video/mp4'});
+}
+// ==MUX-END==
+
+// FFT 4096 dengan jendela Blackman + smoothing 0,35: meniru AnalyserNode (|X|/N -> dB)
+function makeOfflineSpec(){
+  const N=4096,H=N/2,win=new Float32Array(N),re=new Float32Array(N),im=new Float32Array(N),prev=new Float32Array(H),out=new Float32Array(H);
+  const rev=new Uint16Array(N),cs=new Float32Array(H),sn=new Float32Array(H);
+  for(let n=0;n<N;n++)win[n]=0.42-0.5*Math.cos(2*Math.PI*n/N)+0.08*Math.cos(4*Math.PI*n/N);
+  for(let i=0;i<N;i++){let r=0;for(let b=0;b<12;b++)if(i&(1<<b))r|=1<<(11-b);rev[i]=r}
+  for(let i=0;i<H;i++){cs[i]=Math.cos(2*Math.PI*i/N);sn[i]=-Math.sin(2*Math.PI*i/N)}
+  return function frame(x,start){
+    for(let i=0;i<N;i++){const j=start+i;re[rev[i]]=(j>=0&&j<x.length?x[j]:0)*win[i];im[rev[i]]=0}
+    for(let size=2;size<=N;size<<=1){
+      const half=size>>1,step=N/size;
+      for(let i=0;i<N;i+=size)for(let k=0,t=0;k<half;k++,t+=step){
+        const a=i+k,b=a+half,tr=re[b]*cs[t]-im[b]*sn[t],ti=re[b]*sn[t]+im[b]*cs[t];
+        re[b]=re[a]-tr;im[b]=im[a]-ti;re[a]+=tr;im[a]+=ti;
+      }
+    }
+    for(let k=0;k<H;k++){const m=Math.hypot(re[k],im[k])/N;prev[k]=0.35*prev[k]+0.65*m;out[k]=prev[k]>1e-10?20*Math.log10(prev[k]):-200}
+    return out;
+  };
+}
+const _tick=()=>new Promise(r=>{const c=new MessageChannel();c.port1.onmessage=()=>{c.port1.close();r()};c.port2.postMessage(0)});
+const offlineSupported=()=>!!(window.VideoEncoder&&window.AudioEncoder&&window.VideoFrame&&window.AudioData&&window.MessageChannel);
+
+async function exportOffline(t,S){
+  const unsupported=m=>Object.assign(new Error(m),{unsupported:true});
+  const FPS=30,bar=$('expBar'),tm=$('expTime'),g=$('expCanvas').getContext('2d');
+  // 1) decode audio -> PCM
+  const AC=window.AudioContext||window.webkitAudioContext;let buf;
+  {const ac=new AC({sampleRate:48000});try{buf=await ac.decodeAudioData(await t.file.arrayBuffer())}finally{try{ac.close()}catch(_){}}}
+  const sr=buf.sampleRate,N=buf.length,dur=buf.duration;
+  if(!N||!(dur>0))throw new Error('audio kosong');
+  const L=buf.getChannelData(0),R=buf.numberOfChannels>1?buf.getChannelData(1):L,mono=new Float32Array(N);
+  for(let i=0;i<N;i++)mono[i]=(L[i]+R[i])*0.5;
+  // 2) pilih codec yang didukung browser
+  let vc=null,ac2=null;
+  const vbr=S>=1080?8e6:5e6;
+  for(const c of [{codec:'avc1.640028',kind:'avc'},{codec:'avc1.4d0028',kind:'avc'},{codec:'vp09.00.40.08',kind:'vp9'}]){
+    const cfg=Object.assign({codec:c.codec,width:S,height:S,bitrate:vbr,framerate:FPS},c.kind==='avc'?{avc:{format:'avc'}}:{});
+    try{if((await VideoEncoder.isConfigSupported(cfg)).supported){vc={kind:c.kind,cfg};break}}catch(_){}
+  }
+  for(const c of [{codec:'mp4a.40.2',kind:'aac'},{codec:'opus',kind:'opus'}]){
+    const cfg={codec:c.codec,sampleRate:sr,numberOfChannels:2,bitrate:192000};
+    try{if((await AudioEncoder.isConfigSupported(cfg)).supported){ac2={kind:c.kind,cfg};break}}catch(_){}
+  }
+  if(!vc||!ac2)throw unsupported('codec tidak tersedia');
+  // 3) encoder
+  let encErr=null,vDesc=null,aDesc=null;const vOut=[],aOut=[];
+  const venc=new VideoEncoder({output:(ch,meta)=>{const d=new Uint8Array(ch.byteLength);ch.copyTo(d);vOut.push({d,ts:ch.timestamp,key:ch.type==='key'});
+    if(!vDesc&&meta&&meta.decoderConfig&&meta.decoderConfig.description)vDesc=_toU8(meta.decoderConfig.description).slice()},error:e=>{encErr=e}});
+  const aenc=new AudioEncoder({output:(ch,meta)=>{const d=new Uint8Array(ch.byteLength);ch.copyTo(d);aOut.push({d,ts:ch.timestamp,us:ch.duration});
+    if(!aDesc&&meta&&meta.decoderConfig&&meta.decoderConfig.description)aDesc=_toU8(meta.decoderConfig.description).slice()},error:e=>{encErr=e}});
+  venc.configure(vc.cfg);aenc.configure(ac2.cfg);
+  const closeAll=()=>{try{venc.close()}catch(_){}try{aenc.close()}catch(_){}};
+  try{
+    // 4) audio -> encoder
+    for(let pos=0;pos<N;pos+=4096){
+      if(EXP.cancel){closeAll();return null}
+      const nf=Math.min(4096,N-pos),data=new Float32Array(nf*2);data.set(L.subarray(pos,pos+nf),0);data.set(R.subarray(pos,pos+nf),nf);
+      const ad=new AudioData({format:'f32-planar',sampleRate:sr,numberOfFrames:nf,numberOfChannels:2,timestamp:Math.round(pos/sr*1e6),data});
+      aenc.encode(ad);ad.close();
+      if(encErr)throw encErr;
+      while(aenc.encodeQueueSize>16)await _tick();
+    }
+    // 5) frame video: spektrum dihitung dari PCM, digambar, di-encode
+    const cover=await loadCoverImg(t.cover),spec=makeOfflineSpec();
+    const st=SpectrumAnalyzer.createState(SpectrumAnalyzer.createLayout(64,sr,4096)),cv=$('expCanvas');
+    const total=Math.ceil(dur*FPS);
+    for(let i=0;i<total;i++){
+      if(EXP.cancel){closeAll();return null}
+      const ts=i/FPS;SpectrumAnalyzer.update(st,spec(mono,Math.round(ts*sr)-2048),1/FPS);
+      drawExport(g,S,{bars:st.bars,kick:st.kick,cover,name:t.name,id:t.id,cur:Math.min(ts,dur),dur});
+      const vf=new VideoFrame(cv,{timestamp:Math.round(i*1e6/FPS),duration:Math.round(1e6/FPS)});
+      venc.encode(vf,{keyFrame:i%60===0});vf.close();
+      if(encErr)throw encErr;
+      if(i%6===0){bar.value=Math.round(i/total*1000);tm.textContent='Merender '+Math.round(i/total*100)+'%';await _tick()}
+      while(venc.encodeQueueSize>8)await _tick();
+    }
+    bar.value=1000;tm.textContent='Menyusun file…';
+    await aenc.flush();await venc.flush();if(encErr)throw encErr;
+    closeAll();
+  }catch(e){closeAll();throw e}
+  // 6) susun MP4
+  if(!vOut.length||!aOut.length)throw new Error('hasil encode kosong');
+  for(let i=1;i<vOut.length;i++)if(vOut[i].ts<=vOut[i-1].ts)throw unsupported('urutan frame tidak monoton (B-frame)');
+  if(vc.kind==='avc'&&!vDesc)throw unsupported('avcC tidak tersedia');
+  if(!aDesc)throw unsupported('konfigurasi audio tidak tersedia');
+  const aTs=ac2.kind==='aac'?sr:48000;
+  const blob=muxMp4(
+    {w:S,h:S,kind:vc.kind,desc:vDesc,ts:FPS*1000,samples:vOut.map(s=>({d:s.d,key:s.key,dur:1000}))},
+    {kind:ac2.kind,desc:aDesc,sr,ch:2,ts:aTs,samples:aOut.map(s=>({d:s.d,dur:s.us?Math.max(1,Math.round(s.us*aTs/1e6)):1024}))});
+  return {blob,label:(vc.kind==='avc'?'H.264':'VP9')+' + '+(ac2.kind==='aac'?'AAC':'Opus')};
+}
+// Satu lagu -> {blob,ext,note} | null (dibatalkan). Pakai WebCodecs bila ada, jika tidak rekam real-time.
+async function exportTrack(t,S){
+  $('expBar').value=0;$('expTime').textContent='0:00 / 0:00';
+  if(offlineSupported()){
+    EXP.mode='offline';$('expCanvas').width=$('expCanvas').height=S;
+    $('expMsg').textContent='Merender video dari file lagu. Boleh pindah tab; jangan tutup halaman ini. Lama proses tergantung kecepatan perangkat.';
+    try{
+      const r=await exportOffline(t,S);
+      return r===null?null:{blob:r.blob,ext:'mp4',note:r.label};
+    }catch(e){if(!(e&&e.unsupported))throw e}
+  }
+  EXP.mode='realtime';
+  return exportRealtime(t,S);
+}
+async function startExport(){
+  if(EXP.run)return;
+  const picks=expChecked().map(i=>tracks[i]).filter(Boolean);
+  if(!picks.length){toast('Pilih minimal satu lagu.');return}
+  const S=Number($('expSize').value)||720;
+  clearExpResults();EXP.run=true;EXP.cancel=false;setExpUI('run');
+  const used=new Set();
+  for(let i=0;i<picks.length;i++){
+    const t=picks[i];
+    $('expInfo').textContent='Lagu '+(i+1)+' dari '+picks.length+': "'+t.name+'"';
+    let res;
+    try{
+      const r=await exportTrack(t,S);
+      if(r===null||EXP.cancel)break;
+      let base=expBase(t),k=base,n=2;while(used.has(k))k=base+'_'+n++;used.add(k);
+      res={name:t.name,base:k,ext:r.ext,note:r.note,blob:r.blob,size:r.blob.size,url:URL.createObjectURL(r.blob)};
+    }catch(e){
+      if(EXP.cancel)break;
+      res={name:t.name,err:(e&&e.message)?e.message:String(e)};
+    }
+    EXP.results.push(res);
+  }
+  const canceled=EXP.cancel;EXP.run=false;EXP.stop=null;
+  if($('expModal').hidden){clearExpResults();return}      // modal ditutup saat proses
+  if(!EXP.results.length){setExpUI('idle');$('expCanvas').width=$('expCanvas').height=720;expSelChanged();$('expMsg').textContent=canceled?'Ekspor dibatalkan.':'Tidak ada video yang berhasil dibuat.';return}
+  const ok=EXP.results.filter(r=>r.url),bad=EXP.results.length-ok.length;
+  renderResults();
+  if(ok.length)previewResult(ok[0]);
+  $('expDlLabel').textContent=ok.length>1?'Unduh semua ('+ok.length+')':'Unduh video';
+  $('expDownload').hidden=!ok.length;
+  $('expResultMsg').textContent='Selesai: '+ok.length+' video berhasil'+(bad?', '+bad+' gagal':'')+(canceled?' (sisanya dibatalkan)':'')+'.';
+  setExpUI('done');$('expDownload').hidden=!ok.length;
+  $('expVideo').hidden=!ok.length;
+}
 </script>
 </body>
 </html>
